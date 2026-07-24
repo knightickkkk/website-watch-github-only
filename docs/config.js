@@ -1,1 +1,1 @@
-window.WATCH_REPO_URL = "https://github.com/YOUR_USERNAME/YOUR_REPO";
+window.WATCH_REPO_URL = "https://github.com/knightickkkk/website-watch-github-only";
