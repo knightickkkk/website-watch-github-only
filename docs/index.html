@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Website Watch</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./config.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">Free website change alerts</p>
+        <h1 id="page-title">Get a screenshot email when a page changes.</h1>
+        <p class="lede">
+          Enter your email and a public website URL. The next step opens a pre-filled GitHub issue so the daily watcher can track it.
+        </p>
+      </section>
+
+      <section class="panel" aria-label="Create website alert">
+        <div id="repo-warning" class="alert" hidden>
+          The site owner needs to set <code>WATCH_REPO_URL</code> in <code>docs/config.js</code>.
+        </div>
+
+        <form id="watch-form" class="watch-form">
+          <label>
+            Email address
+            <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com">
+          </label>
+
+          <label>
+            Website URL
+            <input id="website" name="website" type="url" required placeholder="https://example.com">
+          </label>
+
+          <label>
+            CSS selector
+            <input id="selector" name="selector" type="text" maxlength="180" placeholder="Optional, e.g. .price or #deadline">
+          </label>
+
+          <fieldset>
+            <legend>Compare mode</legend>
+            <label class="radio-row">
+              <input type="radio" name="compare_mode" value="text" checked>
+              <span>Visible text</span>
+            </label>
+            <label class="radio-row">
+              <input type="radio" name="compare_mode" value="screenshot">
+              <span>Screenshot pixels</span>
+            </label>
+            <label class="radio-row">
+              <input type="radio" name="compare_mode" value="text_or_screenshot">
+              <span>Either text or screenshot</span>
+            </label>
+          </fieldset>
+
+          <button type="submit">Open request issue</button>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      const form = document.querySelector("#watch-form");
+      const warning = document.querySelector("#repo-warning");
+      const repoUrl = (window.WATCH_REPO_URL || "").replace(/\/$/, "");
+
+      if (!repoUrl || repoUrl.includes("YOUR_USERNAME")) {
+        warning.hidden = false;
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        if (!repoUrl || repoUrl.includes("YOUR_USERNAME")) {
+          warning.hidden = false;
+          return;
+        }
+
+        const email = document.querySelector("#email").value.trim();
+        const website = document.querySelector("#website").value.trim();
+        const selector = document.querySelector("#selector").value.trim();
+        const compareMode = new FormData(form).get("compare_mode") || "text";
+
+        const title = `Watch request: ${website}`;
+        const body = [
+          "Email: " + email,
+          "Website: " + website,
+          "Selector: " + selector,
+          "Compare mode: " + compareMode,
+          "",
+          "I understand that this issue may be visible depending on the repository visibility."
+        ].join("\n");
+
+        const issueUrl = new URL(repoUrl + "/issues/new");
+        issueUrl.searchParams.set("title", title);
+        issueUrl.searchParams.set("body", body);
+        issueUrl.searchParams.set("labels", "watch-request");
+
+        window.location.href = issueUrl.toString();
+      });
+    </script>
+  </body>
+</html>
